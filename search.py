@@ -93,47 +93,48 @@ def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
 
-
     visited = {}
     parent = {}
     actions = {}
     bfs_res = []
     que = util.Queue()
 
-    ######## Initiating start node
     start = problem.getStartState()
     que.push(start)
     parent[start] = None
-    visited[start] = True
 
     def traceBack(node):
         while (parent[node]!=None):
             bfs_res.insert(0, actions[node])
             node = parent[node]
-        return bfs_res
 
     while (not que.isEmpty()):
         node = que.pop()      
+        visited[node] = True
+        # current node need to Not a deadend 
         if node is not None:
             children = problem.getSuccessors(node)
+
             for child in children:
                 newNode = child[0]
                 action = child[1]
+                cost = child[2]
+                
+                # We found a new node
                 if newNode not in (visited):
-                    visited[newNode] = True
                     actions[newNode] = action
                     parent[newNode] = node
+
                     if (problem.isGoalState(newNode)):
                         traceBack(newNode)
                     else:
                         que.push(newNode)
+                        visited[newNode] = True
 
-        if (problem.isGoalState(problem.getStartState())) : 
-            print("Goal")
-            while (parent[node]!=None):
-                bfs_res.insert(0, actions[node])
-                node = parent[node]
 
+                    
+                        
+    return bfs_res
     # util.raiseNotDefined()
 
 def uniformCostSearch(problem):
