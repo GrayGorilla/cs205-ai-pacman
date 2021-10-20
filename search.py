@@ -127,10 +127,52 @@ def depthFirstSearch(problem):
         directionsList.reverse()
     return list(map(lambda x : x[1], directionsList))
 
+
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    visited = {}
+    frontier = util.Queue()
+    path = []
+    goalFound = False
+
+    def traceBack(lastAction, parent):
+        path.append(lastAction)
+        state = parent
+        while (visited[state][0] is not None):
+            path.append(visited[state][1])
+            state = visited[state][0]
+        path.reverse()
+        return path 
+
+    state = problem.getStartState()
+    if (problem.isGoalState(state)):
+        return path
+    else:
+        frontier.push(state) 
+        visited[state] = (None, None, 0)
+
+        while (not frontier.isEmpty()):
+            state = frontier.pop()
+
+            if (state is not None):
+                children = problem.getSuccessors(state)
+                for child in children:
+                    child_state = child[0]
+                    child_action = child[1]
+                    child_cost = child[2]
+
+                    if (child_state not in visited) and not goalFound:
+                        if (problem.isGoalState(child_state)):
+                            goalFound = True
+                            traceBack(child_action, state)
+                        else:
+                            frontier.push(child_state)
+                            visited[child_state] = (state, child_action, child_cost)
+
+    return path
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
