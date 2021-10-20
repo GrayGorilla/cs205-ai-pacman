@@ -89,53 +89,54 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
+
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
 
     visited = {}
-    parent = {}
-    actions = {}
-    bfs_res = []
-    que = util.Queue()
+    frontier = util.Queue()
+    path = []
+    
+    def traceBack(lastAction, parent):
+        path.append(lastAction)
+        state = parent
+        while (visited[state][0] is not None):
+            path.append(visited[state][1])
+            state = visited[state][0]
+        path.reverse()
+        return path
 
-    start = problem.getStartState()
-    que.push(start)
-    parent[start] = None
+    state = problem.getStartState()
+    if (problem.isGoalState(state)):
+        return path
+    else:
+        frontier.push(state) 
+        visited[state] = (None, None, 0)
 
-    def traceBack(node):
-        while (parent[node]!=None):
-            bfs_res.insert(0, actions[node])
-            node = parent[node]
+        while (not frontier.isEmpty()):
+            state = frontier.pop()
+            #key: state, value: (parent, action, cost)
 
-    while (not que.isEmpty()):
-        node = que.pop()      
-        visited[node] = True
-        # current node need to Not a deadend 
-        if node is not None:
-            children = problem.getSuccessors(node)
+            if (state is not None):
+                children = problem.getSuccessors(state)
 
-            for child in children:
-                newNode = child[0]
-                action = child[1]
-                cost = child[2]
-                
-                # We found a new node
-                if newNode not in (visited):
-                    actions[newNode] = action
-                    parent[newNode] = node
+                for child in children:
+                    child_state = child[0]
+                    child_action = child[1]
+                    child_cost = child[2]
 
-                    if (problem.isGoalState(newNode)):
-                        traceBack(newNode)
-                    else:
-                        que.push(newNode)
-                        visited[newNode] = True
-
-
-                    
+                    if child_state not in visited:
                         
-    return bfs_res
-    # util.raiseNotDefined()
+                        if (problem.isGoalState(child_state)):
+                            #sending goal state and its parent state to traceback
+                            traceBack(child_action, state)
+                        else:
+                            visited[child_state] = (state, child_action, child_cost)
+                            frontier.push(child_state)
+
+    return path
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
