@@ -97,7 +97,8 @@ def breadthFirstSearch(problem):
     visited = {}
     frontier = util.Queue()
     path = []
-    
+    goalFound = False
+
     def traceBack(lastAction, parent):
         path.append(lastAction)
         state = parent
@@ -105,7 +106,7 @@ def breadthFirstSearch(problem):
             path.append(visited[state][1])
             state = visited[state][0]
         path.reverse()
-        return path
+        return path 
 
     state = problem.getStartState()
     if (problem.isGoalState(state)):
@@ -116,24 +117,21 @@ def breadthFirstSearch(problem):
 
         while (not frontier.isEmpty()):
             state = frontier.pop()
-            #key: state, value: (parent, action, cost)
 
             if (state is not None):
                 children = problem.getSuccessors(state)
-
                 for child in children:
                     child_state = child[0]
                     child_action = child[1]
                     child_cost = child[2]
 
-                    if child_state not in visited:
-                        
+                    if (child_state not in visited) and not goalFound:
                         if (problem.isGoalState(child_state)):
-                            #sending goal state and its parent state to traceback
+                            goalFound = True
                             traceBack(child_action, state)
                         else:
-                            visited[child_state] = (state, child_action, child_cost)
                             frontier.push(child_state)
+                            visited[child_state] = (state, child_action, child_cost)
 
     return path
 
