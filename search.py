@@ -97,7 +97,71 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    from game import Directions
+    s = Directions.SOUTH
+    w = Directions.WEST
+    n = Directions.NORTH
+    e = Directions.EAST
+
+    start = problem.getStartState()
+
+    # Already there!
+    if problem.isGoalState(start):
+        print "Start is goal."
+        return start
+
+    solutions = list()
+    parent_dict = dict()
+    num_solutions_found = 0
+
+    def get_cheapest_solution(solutions):
+        # LEFT HERE
+
+    def make_solution(final_node):
+        solution = list()
+        current_node = final_node
+
+        while parent_dict[current_node]:
+            solution.append(current_node)
+            current_node = parent_dict[current_node]
+
+        solution.append(start)
+        solutions.append(solution)
+
+    pq = util.PriorityQueue()
+    pq.push(start, 0)
+
+    while not pq.isEmpty():
+        node = pq.pop()
+
+        if problem.isGoalState(node):
+            make_solution(node)
+            num_solutions_found += 1
+
+        children = problem.getSuccessors(node)
+
+        if children:
+            for child in children:
+                parent_cost = node[2]
+
+                child_coordinates = child[0]  # Location on the board. Tuple of 2 integers, e.g., (36, 16)
+                child_direction = child[1]  # Direction relative to parent. Values are 'North', 'East', 'South', and 'West'
+                child_cost = child[2]  # Cost to explore this child. Values is a single integer
+                total_cost = parent_cost + child_cost
+
+                # If item already in priority queue with higher priority, update its priority and rebuild the heap.
+                # If item already in priority queue with equal or lower priority, do nothing.
+                # If item not in priority queue, do the same thing as pq.push.
+                pq.update(child, total_cost)
+
+    if num_solutions_found > 0:
+        # print_traceback()
+        return solutions
+    else:
+        print "Could not find a solution :(\n"
+        return [w, w, w]
+
+    return [w, w, w]
 
 def nullHeuristic(state, problem=None):
     """
