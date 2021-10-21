@@ -18,7 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-
+import math
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -177,19 +177,8 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
-def nullHeuristic(state, problem=None):
-    """
-    A heuristic function estimates the cost from the current state to the nearest
-    goal in the provided SearchProblem.  This heuristic is trivial.
-    """
-    return 0
-
-def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-
+    
     def traceBack(child_action, parent):
         solution = []
         #append last action to Goal to solution
@@ -204,8 +193,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         solution.reverse()
         return solution
 
-    def heuristic():
-        return 0
+    # def heuristic():
+    #     return 0
 
 
     frontier = util.PriorityQueue()
@@ -250,7 +239,105 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     child_cost = child[2]
 
                     # h = heuristic(state, child_state)
-                    h = heuristic()
+                    h = 0
+                    # How far it actually took to get to child_g
+                    child_g = g + child_cost
+                    f = child_g + h
+
+                    # new node found
+                    if (child_state not in explored) and (child_state not in visited):
+                        frontier.push(child_state, f)
+                        visited[child_state] = (child_g, f, state, child_action)
+                    
+                    # it's something that we already put in pq
+                    # but we got cheaper route to goal 
+                    elif (child_state in visited) and (visited[child_state][1] > f):
+                        visited[child_state] = (child_g, f, state, child_action) 
+                        frontier.update(child_state, f)
+                    
+    return path
+
+    util.raiseNotDefined()
+
+def nullHeuristic(state, problem=None):
+    """
+    A heuristic function estimates the cost from the current state to the nearest
+    goal in the provided SearchProblem.  This heuristic is trivial.
+    """
+    return 0
+
+def aStarSearch(problem, heuristic=nullHeuristic):
+    """Search the node that has the lowest combined cost and heuristic first."""
+    "*** YOUR CODE HERE ***"
+
+    # print(problem.heuristicInfo['foodGrid'])
+    def traceBack(child_action, parent):
+        solution = []
+        #append last action to Goal to solution
+        solution.append(child_action)
+        while(parent is not start):
+            # append current action to solution
+            parent_action = explored[parent][0]
+            solution.append(parent_action)
+            # update parent
+            parent = explored[parent][1]
+
+        solution.reverse()
+        return solution
+
+    def euclideanDistance(xy1, xy2):
+        return math.sqrt((xy1[0]-xy2[0])**2 + (xy1[1]-xy2[1])**2)
+
+    def heuristic(method, xy1, xy2):
+        if (method==1):
+            return util.manhattanDistance(xy1, xy2)
+        elif (method==2):
+            return euclideanDistance(xy1, xy2)
+        return 0
+
+    frontier = util.PriorityQueue()
+    onening = {}
+    explored = {}
+    visited = {}
+    goalFound = False
+
+    start = problem.getStartState()
+    if (problem.isGoalState(start)):
+        traceBack(start, None)
+    else:
+        # (position, g, f, parent, action)
+        # item = [start, 0, 0, None, None]
+        frontier.push(start, 0)
+        #g, f, par, act
+        visited[start] = (0, 0, None, None)
+
+        while ((not frontier.isEmpty()) and (not goalFound)):
+            # get the current state
+            state = frontier.pop()
+
+            # Got to the goal
+            if (problem.isGoalState(state)):
+                goalFound = True
+                print("goal is found")
+                path = traceBack(visited[state][3], visited[state][2])
+
+            else:
+                # stats of the current state
+                g = visited[state][0]
+                parent = visited[state][2]
+                action = visited[state][3]
+
+                # add the current node to explored
+                explored[state] = (action, parent)
+                
+                children = problem.getSuccessors(state)
+                for child in children:
+                    child_state = child[0]
+                    child_action = child[1]
+                    child_cost = child[2]
+
+                    # h = heuristic(state, child_state)
+                    h = 0
                     # How far it actually took to get to child_g
                     child_g = g + child_cost
                     f = child_g + h
