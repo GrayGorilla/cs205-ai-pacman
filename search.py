@@ -212,9 +212,9 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     onening = {}
     explored = {}
     visited = {}
+    goalFound = False
 
     start = problem.getStartState()
-    print(problem.getSuccessors(start))
     if (problem.isGoalState(start)):
         traceBack(start, None)
     else:
@@ -224,32 +224,31 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         #g, f, par, act
         visited[start] = (0, 0, None, None)
 
-        while (not frontier.isEmpty() or not goalFound):
+        while ((not frontier.isEmpty()) and (not goalFound)):
             # get the current state
             state = frontier.pop()
 
-            # stats of the current state
-            g = visited[state][0]
-            parent = visited[state][2]
-            action = visited[state][3]
+            # Got to the goal
+            if (problem.isGoalState(state)):
+                goalFound = True
+                print("goal is found")
+                path = traceBack(visited[state][3], visited[state][2])
 
-            # add the current node to explored
-            explored[state] = (action, parent)
-            
-            children = problem.getSuccessors(state)
-            for child in children:
-                child_state = child[0]
-                child_action = child[1]
-                child_cost = child[2]
-                if (problem.isGoalState(child_state)):
-                    goalFound = True
-                    print("Goal found")
-                    print(child_action, state)
-                    print(visited[state])
-                    path = traceBack(child_action, state)
-                    break;
+            else:
+                # stats of the current state
+                g = visited[state][0]
+                parent = visited[state][2]
+                action = visited[state][3]
 
-                else:
+                # add the current node to explored
+                explored[state] = (action, parent)
+                
+                children = problem.getSuccessors(state)
+                for child in children:
+                    child_state = child[0]
+                    child_action = child[1]
+                    child_cost = child[2]
+
                     # h = heuristic(state, child_state)
                     h = heuristic()
                     # How far it actually took to get to child_g
@@ -266,10 +265,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     elif (child_state in visited) and (visited[child_state][1] > f):
                         visited[child_state] = (child_g, f, state, child_action) 
                         frontier.update(child_state, f)
-                
+                    
     return path
-            
-
 
     util.raiseNotDefined()
 
