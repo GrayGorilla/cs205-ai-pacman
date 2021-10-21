@@ -192,10 +192,16 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     def traceBack(child_action, parent):
         solution = []
+        #append last action to Goal to solution
         solution.append(child_action)
-        while(parent is not None):
-            solution.append(explored[parent][1])
+        while(parent is not start):
+            # append current action to solution
+            parent_action = explored[parent][0]
+            solution.append(parent_action)
+            # update parent
             parent = explored[parent][1]
+
+        solution.reverse()
         return solution
 
     def heuristic():
@@ -205,25 +211,30 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     frontier = util.PriorityQueue()
     onening = {}
     explored = {}
+    visited = {}
 
     start = problem.getStartState()
-
+    print(problem.getSuccessors(start))
     if (problem.isGoalState(start)):
         traceBack(start, None)
     else:
-        # position: (g, f, parent, action)
-        item = {start: (0, 0, None, None)}
-        frontier.push(item, 0)
-        
-        while (not frontier.isEmpty()):
-            node = frontier.pop()
-            print(node.keys())
-            state = node.keys()[0]
-            g = node.values()[0][0]
-            parent = node.values()[0][2]
-            action = node.values()[0][3]
-            explored[state] = (g, parent)
-            print(state)
+        # (position, g, f, parent, action)
+        # item = [start, 0, 0, None, None]
+        frontier.push(start, 0)
+        #g, f, par, act
+        visited[start] = (0, 0, None, None)
+
+        while (not frontier.isEmpty() or not goalFound):
+            # get the current state
+            state = frontier.pop()
+
+            # stats of the current state
+            g = visited[state][0]
+            parent = visited[state][2]
+            action = visited[state][3]
+
+            # add the current node to explored
+            explored[state] = (action, parent)
             
             children = problem.getSuccessors(state)
             for child in children:
@@ -232,20 +243,31 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 child_cost = child[2]
                 if (problem.isGoalState(child_state)):
                     goalFound = True
-                    traceBack(child_action, state)
+                    print("Goal found")
+                    print(child_action, state)
+                    print(visited[state])
+                    path = traceBack(child_action, state)
+                    break;
 
-                # h = heuristic(state, child_state)
-                h = heuristic()
-                child_g = g + child_cost
-                f = child_g + h
+                else:
+                    # h = heuristic(state, child_state)
+                    h = heuristic()
+                    # How far it actually took to get to child_g
+                    child_g = g + child_cost
+                    f = child_g + h
 
-                if (child_state not in explored):
-                    frontier.push(({child_state: (child_g, f, state, child_action)}), f)
-                elif (child_state in frontier) and (frontier[child_state][1] > f):
-                    frontier[child_state] = (child_g, f, state, child_action) 
-                    frontier.update(frontier[child], f)
+                    # new node found
+                    if (child_state not in explored) and (child_state not in visited):
+                        frontier.push(child_state, f)
+                        visited[child_state] = (child_g, f, state, child_action)
+                    
+                    # it's something that we already put in pq
+                    # but we got cheaper route to goal 
+                    elif (child_state in visited) and (visited[child_state][1] > f):
+                        visited[child_state] = (child_g, f, state, child_action) 
+                        frontier.update(child_state, f)
                 
-
+    return path
             
 
 
