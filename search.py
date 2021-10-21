@@ -193,10 +193,6 @@ def uniformCostSearch(problem):
         solution.reverse()
         return solution
 
-    # def heuristic():
-    #     return 0
-
-
     frontier = util.PriorityQueue()
     onening = {}
     explored = {}
@@ -207,10 +203,9 @@ def uniformCostSearch(problem):
     if (problem.isGoalState(start)):
         traceBack(start, None)
     else:
-        # (position, g, f, parent, action)
-        # item = [start, 0, 0, None, None]
+        # pushing priority value 0 for start position
         frontier.push(start, 0)
-        #g, f, par, act
+        #key: state_position, value: [g, f, par, act]
         visited[start] = (0, 0, None, None)
 
         while ((not frontier.isEmpty()) and (not goalFound)):
@@ -238,7 +233,7 @@ def uniformCostSearch(problem):
                     child_action = child[1]
                     child_cost = child[2]
 
-                    # h = heuristic(state, child_state)
+                    # h = 0 for uniform cost search
                     h = 0
                     # How far it actually took to get to child_g
                     child_g = g + child_cost
@@ -256,7 +251,6 @@ def uniformCostSearch(problem):
                         frontier.update(child_state, f)
                     
     return path
-
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -305,10 +299,9 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     if (problem.isGoalState(start)):
         traceBack(start, None)
     else:
-        # (position, g, f, parent, action)
-        # item = [start, 0, 0, None, None]
+        # pushing priority value 0 for start position
         frontier.push(start, 0)
-        #g, f, par, act
+        #key: state_position, value: [g, f, par, act]
         visited[start] = (0, 0, None, None)
 
         while ((not frontier.isEmpty()) and (not goalFound)):
@@ -318,7 +311,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             # Got to the goal
             if (problem.isGoalState(state)):
                 goalFound = True
-                print("goal is found")
                 path = traceBack(visited[state][3], visited[state][2])
 
             else:
@@ -336,7 +328,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     child_action = child[1]
                     child_cost = child[2]
 
-                    # h = heuristic(state, child_state)
+                    # h needs to implemented
                     h = 0
                     # How far it actually took to get to child_g
                     child_g = g + child_cost
