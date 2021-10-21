@@ -87,12 +87,92 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # Locals
+    startState = problem.getStartState()
+    pathStack = util.Stack()
+    visited = []
+
+    def dfsHelper(state):
+        visited.append(state)
+        # Goal State Found
+        if problem.isGoalState(state):
+            return True
+        # Goal State Not Found
+        elif pathStack.isEmpty() and state != problem.getStartState():
+            pathStack.push("NONE")
+            return False
+        # Still Searching
+        else:
+            # Expand Node
+            successors = problem.getSuccessors(state)
+            for s in successors:
+                candidateState = s[0]
+                # Unvisited State
+                if candidateState not in visited:
+                    pathStack.push(s)
+                    if dfsHelper(candidateState):
+                        return True
+            # Dead-End Reached
+            pathStack.pop()
+            return False
+
+    # Find Directions & Parse from Stack
+    if dfsHelper(startState) == False:
+        return []
+    else:
+        directionsList = []
+        while not pathStack.isEmpty():
+            directionsList.append(pathStack.pop())
+        directionsList.reverse()
+    return list(map(lambda x : x[1], directionsList))
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    visited = {}
+    frontier = util.Queue()
+    path = []
+    goalFound = False
+
+    def traceBack(lastAction, parent):
+        path.append(lastAction)
+        state = parent
+        while (visited[state][0] is not None):
+            path.append(visited[state][1])
+            state = visited[state][0]
+        path.reverse()
+        return path 
+
+    state = problem.getStartState()
+    if (problem.isGoalState(state)):
+        return path
+    else:
+        frontier.push(state) 
+        visited[state] = (None, None, 0)
+
+        while (not frontier.isEmpty()):
+            state = frontier.pop()
+
+            if (state is not None):
+                children = problem.getSuccessors(state)
+                for child in children:
+                    child_state = child[0]
+                    child_action = child[1]
+                    child_cost = child[2]
+
+                    if (child_state not in visited) and not goalFound:
+                        if (problem.isGoalState(child_state)):
+                            goalFound = True
+                            traceBack(child_action, state)
+                        else:
+                            frontier.push(child_state)
+                            visited[child_state] = (state, child_action, child_cost)
+
+    return path
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
@@ -110,16 +190,63 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
 
-    opened = {}
-    closed = {}
-    candidate = {}
+    def traceBack(child_action, parent):
+        solution = []
+        solution.append(child_action)
+        while(parent is not None):
+            solution.append(explored[parent][1])
+            parent = explored[parent][1]
+        return solution
 
-    state = problem.getStartState()
-    #key: position, value: parent, g, h
-    opened[state] = (None, 0, h)
+    def heuristic():
+        return 0
 
 
+    frontier = util.PriorityQueue()
+    onening = {}
+    explored = {}
 
+    start = problem.getStartState()
+
+    if (problem.isGoalState(start)):
+        traceBack(start, None)
+    else:
+        # position: (g, f, parent, action)
+        item = {start: (0, 0, None, None)}
+        frontier.push(item, 0)
+        
+        while (not frontier.isEmpty()):
+            node = frontier.pop()
+            print(node.keys())
+            state = node.keys()[0]
+            g = node.values()[0][0]
+            parent = node.values()[0][2]
+            action = node.values()[0][3]
+            explored[state] = (g, parent)
+            print(state)
+            
+            children = problem.getSuccessors(state)
+            for child in children:
+                child_state = child[0]
+                child_action = child[1]
+                child_cost = child[2]
+                if (problem.isGoalState(child_state)):
+                    goalFound = True
+                    traceBack(child_action, state)
+
+                # h = heuristic(state, child_state)
+                h = heuristic()
+                child_g = g + child_cost
+                f = child_g + h
+
+                if (child_state not in explored):
+                    frontier.push(({child_state: (child_g, f, state, child_action)}), f)
+                elif (child_state in frontier) and (frontier[child_state][1] > f):
+                    frontier[child_state] = (child_g, f, state, child_action) 
+                    frontier.update(frontier[child], f)
+                
+
+            
 
 
     util.raiseNotDefined()
