@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -70,7 +71,8 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
+
 
 def depthFirstSearch(problem):
     """
@@ -89,20 +91,16 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
+
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
+
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    from game import Directions
-    s = Directions.SOUTH
-    w = Directions.WEST
-    n = Directions.NORTH
-    e = Directions.EAST
-
     start = problem.getStartState()
 
     # Already there!
@@ -110,58 +108,67 @@ def uniformCostSearch(problem):
         print "Start is goal."
         return start
 
-    solutions = list()
     parent_dict = dict()
-    num_solutions_found = 0
-
-    def get_cheapest_solution(solutions):
-        # LEFT HERE
+    actions_dict = dict()
+    cost_so_far_dict = dict()
+    visited = set()
+    pq = util.PriorityQueue()
 
     def make_solution(final_node):
         solution = list()
-        current_node = final_node
+        this_node = final_node
+        while parent_dict[this_node]:
+            solution.insert(0, actions_dict[this_node])
+            this_node = parent_dict[this_node]
 
-        while parent_dict[current_node]:
-            solution.append(current_node)
-            current_node = parent_dict[current_node]
+        return solution
 
-        solution.append(start)
-        solutions.append(solution)
+    # Initialize the children of start
+    parent_dict[start] = None  # Start has no parent. :(
+    children = problem.getSuccessors(start)
 
-    pq = util.PriorityQueue()
-    pq.push(start, 0)
+    if children:
+        for child in children:
+            parent_dict[child[0]] = start
+            actions_dict[child[0]] = child[1]
+            cost_so_far_dict[child[0]] = child[2]  # Start has no cost. So to get to a child, use its own cost.
+            pq.push(child, child[2])
+    # ----------------------------------
 
     while not pq.isEmpty():
-        node = pq.pop()
-
-        if problem.isGoalState(node):
-            make_solution(node)
-            num_solutions_found += 1
-
-        children = problem.getSuccessors(node)
+        parent_node = pq.pop()
+        children = problem.getSuccessors(parent_node[0])
 
         if children:
             for child in children:
-                parent_cost = node[2]
+                # If a child is this node's parent, or a child has already been visited, skip it
+                if child[0] == parent_dict[parent_node[0]] or child[0] in visited:
+                    continue
 
-                child_coordinates = child[0]  # Location on the board. Tuple of 2 integers, e.g., (36, 16)
-                child_direction = child[1]  # Direction relative to parent. Values are 'North', 'East', 'South', and 'West'
-                child_cost = child[2]  # Cost to explore this child. Values is a single integer
+                # Mark visited nodes so we don't get stuck in infinite loops
+                visited.add(child[0])
+                parent_cost = cost_so_far_dict[parent_node[0]]
+                child_cost = child[2]  # Cost to explore this child. Value is a single integer
                 total_cost = parent_cost + child_cost
+
+                # Only update the parents and actions if it's an improvement
+                if child[0] not in cost_so_far_dict or total_cost < cost_so_far_dict[child[0]]:
+                    parent_dict[child[0]] = parent_node[0]
+                    actions_dict[child[0]] = child[1]
+                    cost_so_far_dict[child[0]] = total_cost
+
+                # Found a solution
+                if problem.isGoalState(child[0]):
+                    return make_solution(child[0])
 
                 # If item already in priority queue with higher priority, update its priority and rebuild the heap.
                 # If item already in priority queue with equal or lower priority, do nothing.
                 # If item not in priority queue, do the same thing as pq.push.
                 pq.update(child, total_cost)
 
-    if num_solutions_found > 0:
-        # print_traceback()
-        return solutions
-    else:
-        print "Could not find a solution :(\n"
-        return [w, w, w]
+    print "Could not find a solution :(\n"
+    util.raiseNotDefined()
 
-    return [w, w, w]
 
 def nullHeuristic(state, problem=None):
     """
@@ -169,6 +176,7 @@ def nullHeuristic(state, problem=None):
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
     return 0
+
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
