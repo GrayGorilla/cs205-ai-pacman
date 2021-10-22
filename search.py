@@ -181,9 +181,10 @@ def uniformCostSearch(problem):
     
     def traceBack(child_action, parent):
         solution = []
-        #append last action to Goal to solution
+
+        # append last action to Goal to solution
         solution.append(child_action)
-        while(parent is not start):
+        while parent is not start:
             # append current action to solution
             parent_action = explored[parent][0]
             solution.append(parent_action)
@@ -194,21 +195,20 @@ def uniformCostSearch(problem):
         return solution
 
     frontier = util.PriorityQueue()
-    onening = {}
     explored = {}
     visited = {}
     goalFound = False
-
     start = problem.getStartState()
-    if (problem.isGoalState(start)):
+
+    if problem.isGoalState(start):
         traceBack(start, None)
     else:
         # pushing priority value 0 for start position
         frontier.push(start, 0)
-        #key: state_position, value: [g, f, par, act]
-        visited[start] = (0, 0, None, None)
+        # key: state_position, value: [f, par, act]
+        visited[start] = (0, None, None)
 
-        while ((not frontier.isEmpty()) and (not goalFound)):
+        while (not frontier.isEmpty()) and (not goalFound):
             # get the current state
             state = frontier.pop()
 
@@ -216,13 +216,13 @@ def uniformCostSearch(problem):
             if (problem.isGoalState(state)):
                 goalFound = True
                 print("goal is found")
-                path = traceBack(visited[state][3], visited[state][2])
+                path = traceBack(visited[state][2], visited[state][1])
 
             else:
                 # stats of the current state
                 g = visited[state][0]
-                parent = visited[state][2]
-                action = visited[state][3]
+                parent = visited[state][1]
+                action = visited[state][2]
 
                 # add the current node to explored
                 explored[state] = (action, parent)
@@ -233,25 +233,20 @@ def uniformCostSearch(problem):
                     child_action = child[1]
                     child_cost = child[2]
 
-                    # h = 0 for uniform cost search
-                    h = 0
-                    # How far it actually took to get to child_g
-                    child_g = g + child_cost
-                    f = child_g + h
+                    # How far it actually took to get to child_g                    
+                    f = g + child_cost
 
                     # new node found
                     if (child_state not in explored) and (child_state not in visited):
                         frontier.push(child_state, f)
-                        visited[child_state] = (child_g, f, state, child_action)
+                        visited[child_state] = (f, state, child_action)
                     
                     # it's something that we already put in pq
                     # but we got cheaper route to goal 
-                    elif (child_state in visited) and (visited[child_state][1] > f):
-                        visited[child_state] = (child_g, f, state, child_action) 
-                        frontier.update(child_state, f)
-                    
+                    elif (child_state in visited) and (visited[child_state][0] > f):
+                        visited[child_state] = (f, state, child_action) 
+                        frontier.update(child_state, f)   
     return path
-    util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
     """
@@ -266,7 +261,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     def traceBack(child_action, parent):
         solution = []
-        
+
         # append last action to Goal to solution
         solution.append(child_action)
         while parent is not start:
@@ -280,13 +275,12 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         return solution
 
     frontier = util.PriorityQueue()
-    onening = {}
     explored = {}
     visited = {}
     goalFound = False
-
     start = problem.getStartState()
-    if (problem.isGoalState(start)):
+
+    if problem.isGoalState(start):
         traceBack(start, None)
     else:
         # pushing priority value 0 for start position
@@ -295,7 +289,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         # key: state_position, value: [g, f, par, act]
         visited[start] = (0, 0, None, None)
 
-        while ((not frontier.isEmpty()) and (not goalFound)):
+        while (not frontier.isEmpty()) and (not goalFound):
             # get the current state
             state = frontier.pop()
 
