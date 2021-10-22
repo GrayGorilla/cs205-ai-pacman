@@ -264,12 +264,12 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
 
-    # print(problem.heuristicInfo['foodGrid'])
     def traceBack(child_action, parent):
         solution = []
-        #append last action to Goal to solution
+        
+        # append last action to Goal to solution
         solution.append(child_action)
-        while(parent is not start):
+        while parent is not start:
             # append current action to solution
             parent_action = explored[parent][0]
             solution.append(parent_action)
@@ -278,16 +278,6 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
         solution.reverse()
         return solution
-
-    def euclideanDistance(xy1, xy2):
-        return math.sqrt((xy1[0]-xy2[0])**2 + (xy1[1]-xy2[1])**2)
-
-    def heuristic(method, xy1, xy2):
-        if (method==1):
-            return util.manhattanDistance(xy1, xy2)
-        elif (method==2):
-            return euclideanDistance(xy1, xy2)
-        return 0
 
     frontier = util.PriorityQueue()
     onening = {}
@@ -301,7 +291,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     else:
         # pushing priority value 0 for start position
         frontier.push(start, 0)
-        #key: state_position, value: [g, f, par, act]
+
+        # key: state_position, value: [g, f, par, act]
         visited[start] = (0, 0, None, None)
 
         while ((not frontier.isEmpty()) and (not goalFound)):
@@ -328,10 +319,13 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     child_action = child[1]
                     child_cost = child[2]
 
-                    # h needs to implemented
-                    h = 0
+                    # Calculate heuristic
+                    h = heuristic(child_state, problem)
+
                     # How far it actually took to get to child_g
                     child_g = g + child_cost
+
+                    # Total cost so far + heuristic estimate
                     f = child_g + h
 
                     # new node found
@@ -343,12 +337,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     # but we got cheaper route to goal 
                     elif (child_state in visited) and (visited[child_state][1] > f):
                         visited[child_state] = (child_g, f, state, child_action) 
-                        frontier.update(child_state, f)
-                    
+                        frontier.update(child_state, f)     
     return path
-
-    util.raiseNotDefined()
-
 
 # Abbreviations
 bfs = breadthFirstSearch
