@@ -40,7 +40,6 @@ from game import Actions
 import util
 import time
 import search
-
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
 
@@ -454,6 +453,10 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
+    # problem.heuristicInfo['foodGrid'] = foodGrid.asList()
+
+    # foods = np.argwhere(foodGrid.asList()==1)
+    # problem.heuristicInfo['foodGrid'] = foods
     return 0
 
 class ClosestDotSearchAgent(SearchAgent):

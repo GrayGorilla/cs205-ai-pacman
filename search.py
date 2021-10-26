@@ -18,7 +18,7 @@ Pacman agents (in searchAgents.py).
 """
 
 import util
-
+import math
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -177,7 +177,76 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    
+    def traceBack(child_action, parent):
+        solution = []
+
+        # append last action to Goal to solution
+        solution.append(child_action)
+        while parent is not start:
+            # append current action to solution
+            parent_action = explored[parent][0]
+            solution.append(parent_action)
+            # update parent
+            parent = explored[parent][1]
+
+        solution.reverse()
+        return solution
+
+    frontier = util.PriorityQueue()
+    explored = {}
+    visited = {}
+    goalFound = False
+    start = problem.getStartState()
+
+    if problem.isGoalState(start):
+        traceBack(start, None)
+    else:
+        # pushing priority value 0 for start position
+        frontier.push(start, 0)
+        # key: state_position, value: [f, par, act]
+        visited[start] = (0, None, None)
+
+        while (not frontier.isEmpty()) and (not goalFound):
+            # get the current state
+            state = frontier.pop()
+
+            # Got to the goal
+            if (problem.isGoalState(state)):
+                goalFound = True
+                print("goal is found")
+                path = traceBack(visited[state][2], visited[state][1])
+
+            else:
+                # stats of the current state
+                g = visited[state][0]
+                parent = visited[state][1]
+                action = visited[state][2]
+
+                # add the current node to explored
+                explored[state] = (action, parent)
+                
+                children = problem.getSuccessors(state)
+                for child in children:
+                    child_state = child[0]
+                    child_action = child[1]
+                    child_cost = child[2]
+
+                    # How far it actually took to get to child_g                    
+                    f = g + child_cost
+
+                    # new node found
+                    if (child_state not in explored) and (child_state not in visited):
+                        frontier.push(child_state, f)
+                        visited[child_state] = (f, state, child_action)
+                    
+                    # it's something that we already put in pq
+                    # but we got cheaper route to goal 
+                    elif (child_state in visited) and (visited[child_state][0] > f):
+                        visited[child_state] = (f, state, child_action) 
+                        frontier.update(child_state, f)   
+    return path
 
 def nullHeuristic(state, problem=None):
     """
@@ -189,8 +258,81 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
 
+    def traceBack(child_action, parent):
+        solution = []
+
+        # append last action to Goal to solution
+        solution.append(child_action)
+        while parent is not start:
+            # append current action to solution
+            parent_action = explored[parent][0]
+            solution.append(parent_action)
+            # update parent
+            parent = explored[parent][1]
+
+        solution.reverse()
+        return solution
+
+    frontier = util.PriorityQueue()
+    explored = {}
+    visited = {}
+    goalFound = False
+    start = problem.getStartState()
+
+    if problem.isGoalState(start):
+        traceBack(start, None)
+    else:
+        # pushing priority value 0 for start position
+        frontier.push(start, 0)
+
+        # key: state_position, value: [g, f, par, act]
+        visited[start] = (0, 0, None, None)
+
+        while (not frontier.isEmpty()) and (not goalFound):
+            # get the current state
+            state = frontier.pop()
+
+            # Got to the goal
+            if (problem.isGoalState(state)):
+                goalFound = True
+                path = traceBack(visited[state][3], visited[state][2])
+
+            else:
+                # stats of the current state
+                g = visited[state][0]
+                parent = visited[state][2]
+                action = visited[state][3]
+
+                # add the current node to explored
+                explored[state] = (action, parent)
+                
+                children = problem.getSuccessors(state)
+                for child in children:
+                    child_state = child[0]
+                    child_action = child[1]
+                    child_cost = child[2]
+
+                    # Calculate heuristic
+                    h = heuristic(child_state, problem)
+
+                    # How far it actually took to get to child_g
+                    child_g = g + child_cost
+
+                    # Total cost so far + heuristic estimate
+                    f = child_g + h
+
+                    # new node found
+                    if (child_state not in explored) and (child_state not in visited):
+                        frontier.push(child_state, f)
+                        visited[child_state] = (child_g, f, state, child_action)
+                    
+                    # it's something that we already put in pq
+                    # but we got cheaper route to goal 
+                    elif (child_state in visited) and (visited[child_state][1] > f):
+                        visited[child_state] = (child_g, f, state, child_action) 
+                        frontier.update(child_state, f)     
+    return path
 
 # Abbreviations
 bfs = breadthFirstSearch
