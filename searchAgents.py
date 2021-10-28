@@ -287,6 +287,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.visited = {}
 
     def getStartState(self):
         """
@@ -294,14 +295,20 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        print("starting position", self.startingPosition)
+        return self.startingPosition
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if (state in self.corners) and (state not in self.visited):
+            self.visited[state] = True
+            return True
+        # isGoal = (len(self.visited) == 4)
+        return False
+
 
     def getSuccessors(self, state):
         """
@@ -324,7 +331,12 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-
+            x,y = state[0],state[1]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            if (not hitsWall):
+                successors.append(((nextx, nexty), action, 1))
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
