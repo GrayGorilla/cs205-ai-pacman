@@ -132,45 +132,60 @@ def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
 
-    visited = {}
-    frontier = util.Queue()
+    # visited = {}
+    # frontier = util.Queue()
     path = []
     goalFound = False
 
-    def traceBack(lastAction, parent):
-        path.append(lastAction)
+    def traceBack(visited, lastAction, parent, path):
+        p = []
+        p.append(lastAction)
         state = parent
         while (visited[state][0] is not None):
-            path.append(visited[state][1])
+            p.append(visited[state][1])
             state = visited[state][0]
-        path.reverse()
-        return path 
+        p.reverse()
+        path += p
+        # path.reverse()
+        # return path 
 
-    state = problem.getStartState()
-    if (problem.isGoalState(state)):
+    def bfsHelper():
+        goalFound = False
+        visited = {}
+        frontier = util.Queue()
+
+        state = problem.getStartState()
+        if (problem.isGoalState(state)):
+            return path
+        else:
+            frontier.push(state) 
+            visited[state] = (None, None, 0)
+
+            while (not frontier.isEmpty()):
+                state = frontier.pop()
+
+                if (state is not None):
+                    children = problem.getSuccessors(state)
+                    for child in children:
+                        child_state = child[0]
+                        child_action = child[1]
+                        child_cost = child[2]
+
+                        goalRetVal = problem.isGoalState(child_state)
+                        if (child_state not in visited) and not goalFound:
+                            if (goalRetVal > 0):
+                                goalFound = True
+                                traceBack(visited, child_action, state, path)
+                            else:
+                                frontier.push(child_state)
+                                visited[child_state] = (state, child_action, child_cost)
+                        if (goalRetVal > 1):
+                            bfsHelper()
         return path
-    else:
-        frontier.push(state) 
-        visited[state] = (None, None, 0)
-
-        while (not frontier.isEmpty()):
-            state = frontier.pop()
-
-            if (state is not None):
-                children = problem.getSuccessors(state)
-                for child in children:
-                    child_state = child[0]
-                    child_action = child[1]
-                    child_cost = child[2]
-
-                    if (child_state not in visited) and not goalFound:
-                        if (problem.isGoalState(child_state)):
-                            goalFound = True
-                            traceBack(child_action, state)
-                        else:
-                            frontier.push(child_state)
-                            visited[child_state] = (state, child_action, child_cost)
-
+    bfsHelper()
+    # print(path)
+    # path.reverse()
+    # print(path)
     return path
 
 
