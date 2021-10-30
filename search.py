@@ -178,7 +178,7 @@ def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
 
-    
+
     def traceBack(child_action, parent):
         solution = []
 

@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
         self.visited = {}
+        self.newStart = startingGameState.getPacmanPosition()
 
     def getStartState(self):
         """
@@ -295,8 +296,8 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        print("starting position", self.startingPosition)
-        return self.startingPosition
+        print("starting position", self.newStart)
+        return self.newStart
 
     def isGoalState(self, state):
         """
@@ -305,6 +306,8 @@ class CornersProblem(search.SearchProblem):
         "*** YOUR CODE HERE ***"
         if (state in self.corners) and (state not in self.visited):
             self.visited[state] = True
+            self.newStart = state
+            print("Goal is found, ", state)
             return True
         # isGoal = (len(self.visited) == 4)
         return False
@@ -337,6 +340,11 @@ class CornersProblem(search.SearchProblem):
             hitsWall = self.walls[nextx][nexty]
             if (not hitsWall):
                 successors.append(((nextx, nexty), action, 1))
+
+        # print("current state is ", state)
+        # x, y = state[0], state[1]
+        # print("am i a wall?: ", self.walls[x][y])
+        # print(self.walls)
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
