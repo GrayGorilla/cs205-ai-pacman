@@ -185,7 +185,7 @@ def breadthFirstSearch(problem):
     bfsHelper()
     # print(path)
     # path.reverse()
-    # print(path)
+    print(len(path))
     return path
 
 

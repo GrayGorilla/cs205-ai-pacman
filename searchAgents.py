@@ -342,13 +342,13 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
             if (not hitsWall):
-                successors.insert(0,((nextx, nexty), action, 1))
+                successors.append(((nextx, nexty), action, 1))
 
         # print("current state is ", state)
         # x, y = state[0], state[1]
         # print("am i a wall?: ", self.walls[x][y])
         # print(self.walls)
-        # print(successors)
+        print(state, successors)
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
