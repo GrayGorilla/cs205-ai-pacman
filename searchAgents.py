@@ -287,8 +287,10 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        self.visited = {}
-        self.newStart = startingGameState.getPacmanPosition()
+        # new start will have starting position and list of corners visited so far
+        # the list let us to find further path
+        # the list needs to be in from of tuple, because [] is not hashable
+        self.newStart = (startingGameState.getPacmanPosition(), ())
 
     def getStartState(self):
         """
@@ -296,7 +298,6 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        print("starting position", self.newStart)
         return self.newStart
 
     def isGoalState(self, state):
@@ -304,14 +305,8 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        if (state in self.corners) and (state not in self.visited):
-            self.visited[state] = True
-            self.newStart = state
-            print("Goal is found, ", state)
-            return True
-        # isGoal = (len(self.visited) == 4)
-        return False
-
+        # if there are 4 corners in the list, then we're done
+        return (len(state[1]) == 4)
 
     def getSuccessors(self, state):
         """
@@ -334,17 +329,18 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            x,y = state[0],state[1]
+            position, cornersFound = state
+            x,y = position
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
-            if (not hitsWall):
-                successors.append(((nextx, nexty), action, 1))
+            if not hitsWall:
+                nextStatePosition = (nextx, nexty)
+                # we found the wall 
+                if (nextStatePosition in self.corners) and (nextStatePosition not in cornersFound):
+                    cornersFound += (nextStatePosition,)
+                successors.append( ( (nextStatePosition, cornersFound), action, 1 ) )
 
-        # print("current state is ", state)
-        # x, y = state[0], state[1]
-        # print("am i a wall?: ", self.walls[x][y])
-        # print(self.walls)
         self._expanded += 1 # DO NOT CHANGE
         return successors
 
