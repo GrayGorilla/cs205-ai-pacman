@@ -298,11 +298,11 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
-        # new start will have starting position and list of corners visited so far
-        # the list let us to find further path
+        # new start will have starting position and list of corners it still needs to visit
+        # the list let us to find further a path by adding a dimension to the state
         # the list needs to be in from of tuple, because [] is not hashable
-        self.newStart = (startingGameState.getPacmanPosition(), ())
         self.startingGameState = startingGameState
+        self.newStart = self.startingPosition, self.corners
 
     def getStartState(self):
         """
@@ -317,8 +317,8 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        # if there are 4 corners in the list, then we're done
-        return (len(state[1]) == 4)
+        numFood = len(state[1])
+        return numFood == 0
 
     def getSuccessors(self, state):
         """
@@ -341,19 +341,23 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
-            position, cornersFound = state
-            x, y = position
+            pos, foodLeft = state
+            x, y = pos
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
             if not hitsWall:
-                nextStatePosition = (nextx, nexty)
-                # we found the wall 
-                if (nextStatePosition in self.corners) and (nextStatePosition not in cornersFound):
-                    cornersFound += (nextStatePosition,)
-                successors.append(((nextStatePosition, cornersFound), action, 1))
-
-        self._expanded += 1  # DO NOT CHANGE
+                nextPos = nextx, nexty
+                
+                # Found food at Corner
+                if foodLeft.count(nextPos):
+                    editFoodLeft = list(foodLeft)
+                    editFoodLeft.remove(nextPos)
+                    foodLeft = tuple(editFoodLeft)
+                successors.append(((nextPos, foodLeft), action, 1))
+        
+        # Book Keeping
+        self._expanded += 1 # DO NOT CHANGE
         return successors
 
     def getCostOfActions(self, actions):
@@ -387,14 +391,8 @@ def cornersHeuristic(state, problem):
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    explored_corners = state[1]  # Tuple of location tuples e.g., ((1, 1), (1, 12))
-    unexplored_corners = list()
+    unexplored_corners = state[1]  # Tuple of location tuples e.g., ((1, 1), (1, 12))
     heuristic_total_distance = [0]
-
-    # Find which corners are left to explore
-    for corner in corners:
-        if corner not in explored_corners:
-            unexplored_corners.append(corner)
 
     for corner in unexplored_corners:
         heuristic_total_distance.append(mazeDistance(state[0], corner, problem.startingGameState))
