@@ -40,7 +40,7 @@ from game import Actions
 import util
 import time
 import search
-
+import math
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -391,13 +391,35 @@ def cornersHeuristic(state, problem):
     walls = problem.walls  # These are the walls of the maze, as a Grid (game.py)
 
     "*** YOUR CODE HERE ***"
-    unexplored_corners = state[1]  # Tuple of location tuples e.g., ((1, 1), (1, 12))
-    heuristic_total_distance = [0]
+    # unexplored_corners = state[1]  # Tuple of location tuples e.g., ((1, 1), (1, 12))
+    # heuristic_total_distance = [0]
 
-    for corner in unexplored_corners:
-        heuristic_total_distance.append(mazeDistance(state[0], corner, problem.startingGameState))
+    # for corner in unexplored_corners:
+    #     heuristic_total_distance.append(mazeDistance(state[0], corner, problem.startingGameState))
 
-    return max(heuristic_total_distance)
+
+    # return max(heuristic_total_distance)
+
+    position, unexplored_corners = state
+    score = 0
+    heuristic = {}
+    while unexplored_corners:
+        corners_copy = unexplored_corners 
+        heuristic = {}
+        for corner_c in corners_copy:
+            heuristic[(position, corner_c)] = abs(position[0] - corner_c[0]) + abs(position[1] - corner_c[1])
+        min_pair = min(heuristic.items(), key=lambda x: x[1])
+        position = min_pair[0][1]
+        min_h = min_pair[1] 
+        score += min_h 
+
+        my_list = list(unexplored_corners)
+        # print(position, my_list)
+        my_list.remove(position)
+        unexplored_corners = tuple(my_list)
+
+    return score
+
 
     # Idk why this doesnt work :)
     # From the current location, find the closest corner, aggregate the distance to that corner, pretend this closest
